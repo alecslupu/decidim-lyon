@@ -1,0 +1,75 @@
+version: '3'
+services:
+  database:
+    image: postgres
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+  memcached:
+    image: memcached
+    ports:
+      - "11211:11211"
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/var/lib/redis/data
+  sidekiq:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    command: [ "bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml" ]
+    environment:
+      - DATABASE_HOST=database
+      - DATABASE_USERNAME=postgres
+      - DECIDIM_HOST=localhost
+      - REDIS_URL=redis://redis:6379
+      - MEMCACHE_SERVERS=memcached:11211
+      - RAILS_SERVE_STATIC_FILES=true
+      - RAILS_LOG_TO_STDOUT=true
+      - ASSET_HOST=localhost:3000
+      - FORCE_SSL=1
+      - ENABLE_LETTER_OPENER=1
+      - SEED=true
+      - DEFACE_ENABLED=false
+      - QUESTION_CAPTCHA_HOST=
+    depends_on:
+      - app
+    volumes:
+      - .:/app
+    links:
+      - database
+      - redis
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    environment:
+      - DATABASE_HOST=database
+      - DATABASE_USERNAME=postgres
+      - DECIDIM_HOST=localhost
+      - REDIS_URL=redis://redis:6379
+      - MEMCACHE_SERVERS=memcached:11211
+      - RAILS_SERVE_STATIC_FILES=true
+      - RAILS_LOG_TO_STDOUT=true
+      - ASSET_HOST=localhost:3000
+      - FORCE_SSL=1
+      - ENABLE_LETTER_OPENER=1
+      - SEED=true
+      - DEFACE_ENABLED=false
+      - QUESTION_CAPTCHA_HOST=
+    volumes:
+      - .:/app
+    ports:
+      - 3000:3000
+    depends_on:
+      - database
+      - redis
+      - memcached
+
+volumes:
+  app-data: { }
+  pg-data: { }
+  redis-data: { }
