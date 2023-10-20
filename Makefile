@@ -1,7 +1,7 @@
 run: up
 	@make create-seeds
 
-up: generate-certificate
+up:
 	docker-compose -f docker-compose.local.yml up --build -d
 	@make setup-database
 
