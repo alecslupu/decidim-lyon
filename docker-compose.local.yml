@@ -38,7 +38,7 @@ services:
     depends_on:
       - app
     volumes:
-      - .:/app
+      - shared-volume:/app
     links:
       - database
       - redis
@@ -61,7 +61,7 @@ services:
       - DEFACE_ENABLED=false
       - QUESTION_CAPTCHA_HOST=
     volumes:
-      - .:/app
+      - shared-volume:/app
     ports:
       - 3000:3000
     depends_on:
@@ -70,6 +70,6 @@ services:
       - memcached
 
 volumes:
-  app-data: { }
+  shared-volume: { }
   pg-data: { }
   redis-data: { }

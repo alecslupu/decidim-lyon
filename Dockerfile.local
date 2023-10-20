@@ -21,11 +21,12 @@ RUN bundle config set --local without 'test' && \
 
 COPY package.json yarn.lock ./
 COPY packages packages
-RUN yarn install --frozen-lockfile
+RUN yarn install --frozen-lock
 
 COPY . .
+
 RUN bundle exec bootsnap precompile --gemfile app/ lib/ config/ bin/ db/ && \
-    bundle exec bin/webpack
+    bundle exec rails assets:precompile
 
 # Runner Stage
 FROM ruby:2.7.5-slim as runner
